@@ -1,0 +1,8 @@
+../include/gl_spawns.inc(23) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gArmySpawns"
+../include/gl_spawns.inc(16) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gMedicalSpawns"
+../include/gl_spawns.inc(9) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gPoliceSpawns"
+../include/gl_spawns.inc(104) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gRandomSpawns_LasVenturas"
+../include/gl_spawns.inc(58) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gRandomSpawns_LosSantos"
+../include/gl_spawns.inc(138) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gRandomSpawns_SanFierro"
+Pawn compiler 3.2.3664	 	 	Copyright (c) 1997-2016, ITB CompuPhase
+
