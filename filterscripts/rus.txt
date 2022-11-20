@@ -1,11 +1,5 @@
-C:\Users\admins\Desktop\JvrpFixWindows\GM JVRP\filterscripts\Spawn_stasiun.pwn(2) : îøèáêà 010: íåâåðíàÿ ôóíêöèÿ èëè îáúÿâëåíèå
-C:\Users\admins\Desktop\JvrpFixWindows\GM JVRP\filterscripts\Spawn_stasiun.pwn(2) : îøèáêà 010: íåâåðíàÿ ôóíêöèÿ èëè îáúÿâëåíèå
-C:\Users\admins\Desktop\JvrpFixWindows\GM JVRP\filterscripts\Spawn_stasiun.pwn(2) -- (3) : îøèáêà 021: èäåíòèôèêàòîð "RemoveBuildingForPlayer" óæå îáúÿâëåí
-C:\Users\admins\Desktop\JvrpFixWindows\GM JVRP\filterscripts\Spawn_stasiun.pwn(2) -- (3) : ôàòàëüíàÿ îøèáêà 107: ñëèøêîì ìíîãî îøèáîê íà îäíîé ñòðîêå
-
-Êîìïèëÿöèÿ îñòàíîâëåíà.
-
+D:\Download\ICE FREEROAM CITY\filterscripts\npc.pwn(4) : ïðåäóïðåæäåíèå 235: public-ôóíêöèÿ íóæäàåòñÿ â îïåðåæàþùåì îáúÿâëåíèè (èäåíòèôèêàòîð "OnFilterScriptInnit")
 Pawn compiler 3.2.3664	 	 	Copyright (c) 1997-2016, ITB CompuPhase
 
 
-Îøèáîê:4.
+Ïðåäóïðåæäåíèé:1.

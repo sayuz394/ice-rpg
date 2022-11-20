@@ -21,6 +21,7 @@ L1:
 }
 
 #include <a_samp>
+#include <FCNPC>
 //#include <nex-ac>
 #include "../include/a_mysql.inc"
 #include "../include/sscanf2.inc"
@@ -6442,13 +6443,38 @@ new const
 	{2500,  2800, 3100, 3400, 3700, 4000, 4300, 4600, 15000, 30000}, // LSPD
 	{3000,  3300, 3600, 3900, 4200, 4500, 4800, 5100, 20000, 30000} // FBI
 };
+new PoliceNPC = INVALID_PLAYER_ID;
+new PoliceNPCS = INVALID_PLAYER_ID;
 new total_vehicles_from_files=0;
 // ------------------------------------------
-
+forward CheckNPC(playerid);
+public CheckNPC(playerid){
+	if(IsPlayerInRangeOfPoint(playerid,50.0,1477.3547,-1772.3085,18.7958))
+	{
+     	FCNPC_AimAtPlayer(PoliceNPC, playerid, true, -1, true, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+	    FCNPC_AimAtPlayer(PoliceNPCS, playerid, true, -1, true, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+	    
+	}
+	return 1;
+}
 public OnGameModeInit()
 {
-    ConnectNPC("[BOT]Masinis", "at400ls");
+    PoliceNPC = FCNPC_Create("Police");
+	FCNPC_Spawn(PoliceNPC,71,1477.3547,-1772.3085,18.7958);
+	FCNPC_SetWeaponAccuracy(PoliceNPC, 31, 0.1);
+ 	FCNPC_SetWeapon(PoliceNPC, 31);
+  	FCNPC_SetAmmo(PoliceNPC, 9999);
+	FCNPC_SetHealth(PoliceNPC,100.0);
+	PoliceNPCS = FCNPC_Create("Police2");
+	FCNPC_Spawn(PoliceNPCS,71,1485.1047,-1771.9689,18.7958);
+	FCNPC_SetWeaponAccuracy(PoliceNPCS, 31, 0.1);
+ 	FCNPC_SetWeapon(PoliceNPCS, 31);
+  	FCNPC_SetAmmo(PoliceNPCS, 9999);
+  	FCNPC_SetHealth(PoliceNPCS,100.0);
+  	SetTimerEx("CheckNPC",5000,true,"i");
+	//
 	IFR_OBJ();
+	total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/stole.txt");
     total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/trains.txt");
 	total_vehicles_from_files += LoadStaticVehiclesFromFile("vehicles/pilots.txt");
 
@@ -6715,6 +6741,13 @@ public OnPlayerRequestSpawn(playerid)
 
 public OnPlayerConnect(playerid)
 {
+    SetPlayerMapIcon(playerid, 3,1858.6686,-2040.8510,13.5469, 13, 0, MAPICON_LOCAL);
+    SetPlayerMapIcon(playerid, 4,2523.2729,-1679.6223,15.4970, 38, 0, MAPICON_LOCAL);
+	if(IsPlayerNPC(playerid))
+    {
+        SendClientMessageToAll(-1, "An NPC connected!");
+        return 1;
+    }
 	new hour, minute;
 	gettime(hour, minute);
 
@@ -7046,6 +7079,12 @@ public: SavePlayerAccount(playerid)
 
 public OnPlayerSpawn(playerid)
 {
+	if(IsPlayerNPC(playerid))
+	{
+		new npcname[MAX_PLAYER_NAME];
+		GetPlayerName(playerid,npcname,sizeof(npcname));
+		SetPlayerSkin(playerid,1);
+	}
 	CheckPlayerFlood(playerid, true, MAX_FLOOD_RATE, 500, FLOOD_RATE_KICK);
 	SetPlayerData(playerid, P_IN_HOUSE, 		-1);
 	SetPlayerData(playerid, P_IN_BUSINESS, 		-1);
@@ -7130,6 +7169,15 @@ public OnPlayerDeath(playerid, killerid, reason)
 		{
 			PlayerWantedLevel(killerid);
 			InvitePlayer(killerid,0,1);
+		}
+	}
+	else if(GetPlayerTeamEx(playerid) == 9)
+	{
+		if(GetPlayerTeam(killerid) == 31)
+		{
+			PlayerWantedLevel(killerid);
+			GivePlayerMoney(killerid, 2500);
+			SendClientMessage(playerid,COLOR_GREEN,"Nice Job Pergi Ke Tempat SAYA JIKA ANDA BUTUH UANG BUNG");
 		}
 	}
 	else if(GetPlayerTeamEx(playerid) == 5)
@@ -8380,6 +8428,16 @@ public OnPlayerEnterCheckpoint(playerid)
 		GivePlayerMoneyEx(playerid,750);
 		DisablePlayerCheckpoint(playerid);
 		SetPlayerCheckpoint(playerid,-380.5017,-1438.5305,25.7266,7.0);
+	}
+	if(IsPlayerInRangeOfPoint(playerid,10.0,1873.5845,-2047.3562,13.5469))
+	{   
+	    new vehicleid = GetPlayerVehicleID(playerid);
+		if(GetVehicleModel(vehicleid) == 429 && 451 && 477 && 481)
+		{
+			DestroyVehicle(vehicleid);
+			GivePlayerMoneyEx(playerid,2750);
+			PlayerWantedLevel(playerid);
+		}
 	}
 	CheckPlayerFlood(playerid, true, MAX_FLOOD_RATE, 500, FLOOD_RATE_KICK);
 
@@ -42312,7 +42370,35 @@ CMD:givegun(playerid, params[])
 }
 CMD:joinfraksi(playerid,params[])
 {
-    InvitePlayer(playerid,strval(params),1,true);
+    extract params -> new org_id;
+    if(!(2 <= org_id <= 6)){
+		SendClientMessage(playerid, 0xCECECEFF, "ID organisasi tidak valid");
+		SendClientMessage(playerid, 0xCECECEFF, "1 - Balai KotaLos-Santos");
+		SendClientMessage(playerid, 0xCECECEFF, "2 - Angkatan Laut");
+		SendClientMessage(playerid, 0xCECECEFF, "3 - Rumah sakit g.Los-Santos");
+		SendClientMessage(playerid, 0xCECECEFF, "4 - Media r.Los-Santos");
+		SendClientMessage(playerid, 0xCECECEFF, "5 - LSPD");
+		SendClientMessage(playerid, 0xCECECEFF, "6 - FBI");
+	}
+	else
+	{
+	    InvitePlayer(playerid,strval(params),1,true);
+	}
+ 	return 1;
+}
+CMD:joingang(playerid,params[])
+{
+    extract params -> new org_id;
+    if(!(1 <= org_id >= 7)){
+		SendClientMessage(playerid, 0xCECECEFF, "7 - Grove Gang");
+		SendClientMessage(playerid, 0xCECECEFF, "8 - Vagos Gang");
+		SendClientMessage(playerid, 0xCECECEFF, "9 - Ballas Gang");
+		SendClientMessage(playerid, 0xCECECEFF, "10 - Aztecas Gang");
+	}
+	else
+	{
+	    InvitePlayer(playerid,strval(params),1,true);
+	}
  	return 1;
 }
 CMD:templeader(playerid, params[])
@@ -45599,6 +45685,20 @@ CMD:map(playerid){
 	ShowPlayerDialog(playerid,DIALOG_MAP,DIALOG_STYLE_LIST,"Maps","Jobs\nIlegal Jobs","Choose","Exit");
 	return 1;
 }
+CMD:startmission(playerid){
+	if(IsPlayerInRangeOfPoint(playerid,10.0,1858.6686,-2040.8510,13.5469))
+	{
+	    SendClientMessage(playerid,COLOR_RED,"Cari Diantara 3 Mobil ini yaitu banshee,turismo,zr-350,comet\nKamu Akan Mendapatkan 5000 jika berhasil");
+	    SetPlayerCheckpoint(playerid,1873.5845,-2047.3562,13.5469,10.0);
+	}
+	if(IsPlayerInRangeOfPoint(playerid,10.0,2523.2729,-1679.6223,15.4970))
+	{
+	    SendClientMessage(playerid,COLOR_RED,"Bunuh Gang Balas !!!!");
+	    SetPlayerTeam(playerid,31);
+	    
+	}
+	return 1;
+}
 CMD:joinjob(playerid){
 	if(IsPlayerInRangeOfPoint(playerid,7.0,-380.5017,-1438.5305,25.7266))
 	{
@@ -45625,6 +45725,9 @@ CMD:starterpack(playerid){
 }
 CMD:claimlic(playerid,params[])
 {
+	SetPlayerData(playerid, P_PASS, 1);
+	SendClientMessage(playerid,-1,"{FFFF00}[Informasi]{FFFFFF} Selamat! Anda berhasil menerima paspor!");
+	UpdatePlayerDatabaseInt(playerid, "pass", 1);
     UpdatePlayerDatabaseInt(playerid, "driving_a", 1);
 	UpdatePlayerDatabaseInt(playerid, "driving_b", 1);
 	UpdatePlayerDatabaseInt(playerid, "driving_c", 1);
