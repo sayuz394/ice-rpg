@@ -7636,6 +7636,12 @@ public OnPlayerCommandText(playerid, cmdtext[])
 
 public OnPlayerEnterVehicle(playerid, vehicleid, ispassenger)
 {
+	new vehicleids;
+	vehicleids = GetPlayerVehicleID(playerid);
+	if(GetVehicleModel(vehicleids) == 481)
+	{
+	    SendClientMessage(playerid,COLOR_BLUE,"Anda dapat memulai tantangan sepeda dengan command /startchallenge");
+	}
 	if(CheckPlayerFlood(playerid, true, MAX_FLOOD_RATE, FLOOD_RATE_INC, FLOOD_RATE_KICK))
 	{
 		SendClientMessage(playerid, 0x6B6B6BFF, "Jika Anda melanjutkan, Anda akan terputus dari server");
@@ -45794,6 +45800,14 @@ CMD:startmission(playerid){
 	}
 	return 1;
 }
+CMD:startchallenge(playerid){
+	new vehicleids;
+	vehicleids = GetPlayerVehicleID(playerid);
+	if(GetVehicleModel(vehicleids) == 481){
+	    Sepeda(playerid);
+	}
+	return 1;
+}
 CMD:joinjob(playerid){
 	if(IsPlayerInRangeOfPoint(playerid,7.0,-380.5017,-1438.5305,25.7266))
 	{
@@ -52615,8 +52629,25 @@ stock SpawnDeathMatch(const playerid)
     }
     return 1;
 }
+forward Swimming(playerid);
+public Swimming(playerid){
+	return 1;
+}
+forward Runner(playerid);
+public Runner(playerid){
+	return 1;
+}
+forward EndSepeda(playerid);
+public EndSepeda(playerid){
+	SetPlayerVirtualWorld(playerid,0);
+	SetPlayerHealth(playerid,0);
+}
+forward Sepeda(playerid);
+public Sepeda(playerid){
+	SetTimerEx("EndSepeda",600000,false,"i",playerid);
+	return 1;
+}
 forward PlayerWantedLevel(playerid);
-
 public PlayerWantedLevel(playerid){
 
 	SetPlayerWantedLevel(playerid, 2);
