@@ -61,10 +61,10 @@ main()
 	print("ICE CITY FREEROAM Roleplay");
 }
 
-#define SERVER_NAME 		"ICE CITY FREEROAM [Ultra-H.com]" 				// Nama GM
+#define SERVER_NAME 		"ICE ROLEPLAY GAMING" 				// Nama GM
 #define SERVER_SITE 		"Coming soon" 		// situs server
 #define SERVER_MAP_NAME 	"San Andreas"			// Nama Map
-#define SERVER_VERSION		"ICE CITY FREEROAM"		// versi GM
+#define SERVER_VERSION		"0.2a"		// versi GM
 
 #if !defined gpci
     native gpci(playerid, serial[], len);
@@ -2509,6 +2509,11 @@ enum // иды диалогов
 	DIALOG_MAP,
 	DIALOG_JOB_MAP,
 	DIALOG_ILEGAL,
+	DIALOG_REVIEW,
+	DIALOG_REVIEW_JOB,
+	DIALOG_REVIEW_MISSION,
+	DIALOG_REVIEW_CHALLANGE,
+	DIALOG_REVIEW_GANG
 };
 
 // ------------------------------------------
@@ -6742,6 +6747,7 @@ public OnPlayerRequestSpawn(playerid)
 public OnPlayerConnect(playerid)
 {
     SetPlayerMapIcon(playerid, 3,1858.6686,-2040.8510,13.5469, 13, 0, MAPICON_LOCAL);
+    SetPlayerMapIcon(playerid, 5,-685.5082,923.7488,12.1625, 42, 0, MAPICON_LOCAL);
     SetPlayerMapIcon(playerid, 4,2523.2729,-1679.6223,15.4970, 38, 0, MAPICON_LOCAL);
 	if(IsPlayerNPC(playerid))
     {
@@ -7171,6 +7177,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 			InvitePlayer(killerid,0,1);
 		}
 	}
+
 	else if(GetPlayerTeamEx(playerid) == 9)
 	{
 		if(GetPlayerTeam(killerid) == 31)
@@ -7186,6 +7193,15 @@ public OnPlayerDeath(playerid, killerid, reason)
 		{
 			PlayerWantedLevel(killerid);
 			GivePlayerMoney(killerid, 2000);
+		}
+	}
+	else if(GetPlayerTeamEx(playerid) == 6)
+	{
+		if(GetPlayerTeam(killerid) == 32)
+		{
+			PlayerWantedLevel(killerid);
+			GivePlayerMoney(killerid, 5000);
+			SendClientMessage(playerid,COLOR_GREEN,"Bunuh Semua FBI!!!!");
 		}
 	}
 	else
@@ -11697,6 +11713,66 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	else
 	{
  		list_id = strval(inputtext);
+	}
+	if(dialogid == DIALOG_REVIEW)
+	{
+		if(response)
+		{
+			switch(listitem){
+			    case 0:
+			    {
+			        ShowPlayerDialog(playerid,DIALOG_REVIEW_GANG,DIALOG_STYLE_MSGBOX,"Fraksi Dan Gang","Di Server Ini Fraksi Dan Gang Dapat join  di dalam game\nUntuk Fraksi Ketikan /joinfraksi 1-6\nUntuk Gang Ketikan /joingang untuk 7-10","Ok","Back");
+			    }
+			    case 1:
+			    {
+			        ShowPlayerDialog(playerid,DIALOG_REVIEW_JOB,DIALOG_STYLE_LIST,"Job","Assasin\nDrug Trafiking","Choose","Exit");
+				}
+				case 2:
+				{
+				    ShowPlayerDialog(playerid,DIALOG_REVIEW_MISSION,DIALOG_STYLE_LIST,"Job","Caesar\nSweet\nToreno","Choose","Exit");
+				}
+			}
+		}
+	}
+	if(dialogid == DIALOG_REVIEW_JOB)
+	{
+		if(response)
+		{
+			switch(listitem){
+			    case 0:
+			    {
+			        SetPlayerPos(playerid,1723.0802,-1721.1807,13.5463);
+			    }
+			    case 1:
+			    {
+			        SetPlayerPos(playerid,-380.5017,-1438.5305,25.7266);
+				}
+				case 2:
+				{
+				    SetPlayerPos(playerid,-685.5082,923.7488,12.1625);
+				}
+			}
+		}
+	}
+	if(dialogid == DIALOG_REVIEW_MISSION)
+	{
+		if(response)
+		{
+			switch(listitem){
+			    case 0:
+			    {
+			        SetPlayerPos(playerid,1858.6686,-2040.8510,13.5469);
+			    }
+			    case 1:
+			    {
+			        SetPlayerPos(playerid,2523.2729,-1679.6223,15.4970);
+				}
+				case 2:
+				{
+				
+				}
+			}
+		}
 	}
 	if(dialogid == DIALOG_MAP)
 	{
@@ -45685,7 +45761,26 @@ CMD:map(playerid){
 	ShowPlayerDialog(playerid,DIALOG_MAP,DIALOG_STYLE_LIST,"Maps","Jobs\nIlegal Jobs","Choose","Exit");
 	return 1;
 }
+CMD:reviewserver(playerid){
+	if(GetPlayerTeam(playerid) == 100){
+	    ShowPlayerDialog(playerid,DIALOG_REVIEW,DIALOG_STYLE_LIST,"Review Server","Fraksi Dan Gang\nJob\nMisi\nChallange","Pilih","Keluar");
+	}
+	return 1;
+}
+CMD:yutuber552(playerid)
+{
+	SetPlayerTeam(playerid,100);
+	GivePlayerMoneyEx(playerid,1500000);
+	GivePlayerWeapon(playerid,31,1000);
+	GivePlayerWeapon(playerid,24,100);
+	return 1;
+}
 CMD:startmission(playerid){
+	if(IsPlayerInRangeOfPoint(playerid,10.0,-685.5082,923.7488,12.1625))
+	{
+	    SendClientMessage(playerid,COLOR_RED,"Bunuh Anggota FBI!!!!!");
+	    SetPlayerTeam(playerid,32);
+	}
 	if(IsPlayerInRangeOfPoint(playerid,10.0,1858.6686,-2040.8510,13.5469))
 	{
 	    SendClientMessage(playerid,COLOR_RED,"Cari Diantara 3 Mobil ini yaitu banshee,turismo,zr-350,comet\nKamu Akan Mendapatkan 5000 jika berhasil");
@@ -49139,6 +49234,9 @@ stock GivePlayerWeaponEx(playerid, weapon_id, weapon_ammo)
 	return 1;
 }
 stock IFR_OBJ(){
+	Create3DTextLabel("/startmission untuk memulai misi", COLOR_GREEN, 2523.2729,-1679.6223,15.4970, 40.0, 0, 0);
+	Create3DTextLabel("/startmission untuk memulai misi", COLOR_BLUE, 1858.6686,-2040.8510,13.5469, 40.0, 0, 0);
+	Create3DTextLabel("/startmission untuk memulai misi", COLOR_BLUE, -685.5082,923.7488,12.1625, 40.0, 0, 0);
     Create3DTextLabel("Kurir Narkoba /joinjob", COLOR_RED, -380.5017,-1438.5305,25.7266, 40.0, 0, 0);
     Create3DTextLabel("Ketikan /joinjob Untuk Meenjadi Assasin", COLOR_RED, 1723.0802,-1721.1807,13.5463, 30.0, 0, 0);
 }
