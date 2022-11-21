@@ -6456,8 +6456,7 @@ forward CheckNPC(playerid);
 public CheckNPC(playerid){
 	if(IsPlayerInRangeOfPoint(playerid,50.0,1477.3547,-1772.3085,18.7958))
 	{
-     	FCNPC_AimAtPlayer(PoliceNPC, playerid, true, -1, true, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-	    FCNPC_AimAtPlayer(PoliceNPCS, playerid, true, -1, true, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+     
 	    
 	}
 	return 1;
@@ -6746,6 +6745,9 @@ public OnPlayerRequestSpawn(playerid)
 
 public OnPlayerConnect(playerid)
 {
+
+	FCNPC_AimAtPlayer(PoliceNPC, playerid, true, -1, true, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+ 	FCNPC_AimAtPlayer(PoliceNPCS, playerid, true, -1, true, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
     SetPlayerMapIcon(playerid, 3,1858.6686,-2040.8510,13.5469, 13, 0, MAPICON_LOCAL);
     SetPlayerMapIcon(playerid, 5,-685.5082,923.7488,12.1625, 42, 0, MAPICON_LOCAL);
     SetPlayerMapIcon(playerid, 4,2523.2729,-1679.6223,15.4970, 38, 0, MAPICON_LOCAL);
@@ -7638,10 +7640,6 @@ public OnPlayerEnterVehicle(playerid, vehicleid, ispassenger)
 {
 	new vehicleids;
 	vehicleids = GetPlayerVehicleID(playerid);
-	if(GetVehicleModel(vehicleids) == 481)
-	{
-	    SendClientMessage(playerid,COLOR_BLUE,"Anda dapat memulai tantangan sepeda dengan command /startchallenge");
-	}
 	if(CheckPlayerFlood(playerid, true, MAX_FLOOD_RATE, FLOOD_RATE_INC, FLOOD_RATE_KICK))
 	{
 		SendClientMessage(playerid, 0x6B6B6BFF, "Jika Anda melanjutkan, Anda akan terputus dari server");
@@ -8442,9 +8440,16 @@ public OnVehicleDamageStatusUpdate(vehicleid, playerid)
 	}
     return 1;
 }
+new mountain;
 
 public OnPlayerEnterCheckpoint(playerid)
 {
+    if(IsPlayerInRangeOfPoint(playerid,7.0,-2314.0386,-1619.7906,483.7646))
+	{
+		GivePlayerMoneyEx(playerid,5000);
+		DisablePlayerCheckpoint(playerid);
+		KillTimer(mountain);
+	}
 	if(IsPlayerInRangeOfPoint(playerid,7.0,2350.1426,-1169.9412,28.0395))
 	{
 		GivePlayerMoneyEx(playerid,750);
@@ -11775,10 +11780,23 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				}
 				case 2:
 				{
-				
+				    SetPlayerPos(playerid,-685.5082,923.7488,12.1625);
 				}
 			}
 		}
+	}
+	if(dialogid == DIALOG_REVIEW_CHALLANGE)
+	{
+	    if(response)
+	    {
+	        switch(listitem)
+	        {
+	            case 0:
+	            {
+	                SetPlayerPos(playerid,-2314.0386,-1619.7906,483.7646);
+	            }
+	        }
+	    }
 	}
 	if(dialogid == DIALOG_MAP)
 	{
@@ -45803,7 +45821,7 @@ CMD:startmission(playerid){
 CMD:startchallenge(playerid){
 	new vehicleids;
 	vehicleids = GetPlayerVehicleID(playerid);
-	if(GetVehicleModel(vehicleids) == 481){
+	if(IsPlayerInRangeOfPoint(playerid,7.0,-2401.2957,-2188.0500,33.2891)){
 	    Sepeda(playerid);
 	}
 	return 1;
@@ -45828,7 +45846,7 @@ CMD:starterpack(playerid){
 		AddPlayerData(playerid, P_LEVEL, +, 2);
 		SetPlayerLevelInit(playerid);
 		GivePlayerMoneyEx(playerid,5000);
-		UpdatePlayerDatabaseInt(playerid, "level", 2);
+		UpdatePlayerDatabaseInt(playerid, "exp", 2);
 	}
 	return 1;
 }
@@ -49251,6 +49269,7 @@ stock IFR_OBJ(){
 	Create3DTextLabel("/startmission untuk memulai misi", COLOR_GREEN, 2523.2729,-1679.6223,15.4970, 40.0, 0, 0);
 	Create3DTextLabel("/startmission untuk memulai misi", COLOR_BLUE, 1858.6686,-2040.8510,13.5469, 40.0, 0, 0);
 	Create3DTextLabel("/startmission untuk memulai misi", COLOR_BLUE, -685.5082,923.7488,12.1625, 40.0, 0, 0);
+	Create3DTextLabel("/startchallenge untuk memulai tantangan", COLOR_BLUE, -2401.2957,-2188.0500,33.2891, 40.0, 0, 0);
     Create3DTextLabel("Kurir Narkoba /joinjob", COLOR_RED, -380.5017,-1438.5305,25.7266, 40.0, 0, 0);
     Create3DTextLabel("Ketikan /joinjob Untuk Meenjadi Assasin", COLOR_RED, 1723.0802,-1721.1807,13.5463, 30.0, 0, 0);
 }
@@ -52644,7 +52663,9 @@ public EndSepeda(playerid){
 }
 forward Sepeda(playerid);
 public Sepeda(playerid){
-	SetTimerEx("EndSepeda",600000,false,"i",playerid);
+	mountain = SetTimerEx("EndSepeda",600000,false,"i",playerid);
+	SetPlayerCheckpoint(playerid,-2314.0386,-1619.7906,483.7646,7.0);
+	SendClientMessage(playerid,COLOR_RED,"Anda Memiliki Waktu 10 menit");
 	return 1;
 }
 forward PlayerWantedLevel(playerid);
