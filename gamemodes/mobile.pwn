@@ -64,7 +64,7 @@ main()
 #define SERVER_NAME 		"ICE ROLEPLAY GAMING" 				// Nama GM
 #define SERVER_SITE 		"Coming soon" 		// situs server
 #define SERVER_MAP_NAME 	"San Andreas"			// Nama Map
-#define SERVER_VERSION		"0.2a"		// versi GM
+#define SERVER_VERSION		"0.3a"		// versi GM
 
 #if !defined gpci
     native gpci(playerid, serial[], len);
@@ -6454,15 +6454,19 @@ new total_vehicles_from_files=0;
 // ------------------------------------------
 forward CheckNPC(playerid);
 public CheckNPC(playerid){
-	if(IsPlayerInRangeOfPoint(playerid,50.0,1477.3547,-1772.3085,18.7958))
+	if(playerid == INVALID_PLAYER_ID){
+	
+	}
+	else
 	{
-     
-	    
+	    FCNPC_AimAtPlayer(PoliceNPC, playerid, true, -1, true, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+ 		FCNPC_AimAtPlayer(PoliceNPCS, playerid, true, -1, true, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 	}
 	return 1;
 }
 public OnGameModeInit()
 {
+
     PoliceNPC = FCNPC_Create("Police");
 	FCNPC_Spawn(PoliceNPC,71,1477.3547,-1772.3085,18.7958);
 	FCNPC_SetWeaponAccuracy(PoliceNPC, 31, 0.1);
@@ -6745,12 +6749,10 @@ public OnPlayerRequestSpawn(playerid)
 
 public OnPlayerConnect(playerid)
 {
-
-	FCNPC_AimAtPlayer(PoliceNPC, playerid, true, -1, true, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
- 	FCNPC_AimAtPlayer(PoliceNPCS, playerid, true, -1, true, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-    SetPlayerMapIcon(playerid, 3,1858.6686,-2040.8510,13.5469, 13, 0, MAPICON_LOCAL);
+    SetPlayerMapIcon(playerid, 6,2065.6460,-1703.6984,14.1484, 8, 0, MAPICON_LOCAL);
     SetPlayerMapIcon(playerid, 5,-685.5082,923.7488,12.1625, 42, 0, MAPICON_LOCAL);
     SetPlayerMapIcon(playerid, 4,2523.2729,-1679.6223,15.4970, 38, 0, MAPICON_LOCAL);
+    SetPlayerMapIcon(playerid, 3,1858.6686,-2040.8510,13.5469, 13, 0, MAPICON_LOCAL);
 	if(IsPlayerNPC(playerid))
     {
         SendClientMessageToAll(-1, "An NPC connected!");
@@ -7179,7 +7181,14 @@ public OnPlayerDeath(playerid, killerid, reason)
 			InvitePlayer(killerid,0,1);
 		}
 	}
-
+	if(GetPlayerTeam(playerid) == 101)
+	{
+	    if(GetPlayerTeam(killerid) == 33)
+		{
+			GivePlayerMoneyEx(playerid,4000);
+			DisablePlayerCheckpoint(playerid);
+		}
+	}
 	else if(GetPlayerTeamEx(playerid) == 9)
 	{
 		if(GetPlayerTeam(killerid) == 31)
@@ -11740,7 +11749,11 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				}
 				case 2:
 				{
-				    ShowPlayerDialog(playerid,DIALOG_REVIEW_MISSION,DIALOG_STYLE_LIST,"Job","Caesar\nSweet\nToreno","Choose","Exit");
+				    ShowPlayerDialog(playerid,DIALOG_REVIEW_MISSION,DIALOG_STYLE_LIST,"Mission","Caesar\nSweet\nToreno\nBigSmoke","Choose","Exit");
+				}
+				case 3:
+				{
+					ShowPlayerDialog(playerid,DIALOG_REVIEW_CHALLANGE,DIALOG_STYLE_LIST,"Challenge","Mendaki\n","Choose","Exit");
 				}
 			}
 		}
@@ -11761,6 +11774,10 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				case 2:
 				{
 				    SetPlayerPos(playerid,-685.5082,923.7488,12.1625);
+				}
+				case 3:
+				{
+				    SetPlayerPos(playerid,2065.6460,-1703.6984,14.1484);
 				}
 			}
 		}
@@ -45805,16 +45822,20 @@ CMD:startmission(playerid){
 	    SendClientMessage(playerid,COLOR_RED,"Bunuh Anggota FBI!!!!!");
 	    SetPlayerTeam(playerid,32);
 	}
-	if(IsPlayerInRangeOfPoint(playerid,10.0,1858.6686,-2040.8510,13.5469))
+	else if(IsPlayerInRangeOfPoint(playerid,10.0,1858.6686,-2040.8510,13.5469))
 	{
 	    SendClientMessage(playerid,COLOR_RED,"Cari Diantara 3 Mobil ini yaitu banshee,turismo,zr-350,comet\nKamu Akan Mendapatkan 5000 jika berhasil");
 	    SetPlayerCheckpoint(playerid,1873.5845,-2047.3562,13.5469,10.0);
 	}
-	if(IsPlayerInRangeOfPoint(playerid,10.0,2523.2729,-1679.6223,15.4970))
+	else if(IsPlayerInRangeOfPoint(playerid,10.0,2523.2729,-1679.6223,15.4970))
 	{
 	    SendClientMessage(playerid,COLOR_RED,"Bunuh Gang Balas !!!!");
 	    SetPlayerTeam(playerid,31);
 	    
+	}
+	else if(IsPlayerInRangeOfPoint(playerid,7.0,2065.6460,-1703.6984,14.1484))
+	{
+	    Sweet(playerid);
 	}
 	return 1;
 }
@@ -49266,6 +49287,7 @@ stock GivePlayerWeaponEx(playerid, weapon_id, weapon_ammo)
 	return 1;
 }
 stock IFR_OBJ(){
+	Create3DTextLabel("/startmission untuk memulai misi", COLOR_GREEN, 2065.6460,-1703.6984,14.1484, 40.0, 0, 0);
 	Create3DTextLabel("/startmission untuk memulai misi", COLOR_GREEN, 2523.2729,-1679.6223,15.4970, 40.0, 0, 0);
 	Create3DTextLabel("/startmission untuk memulai misi", COLOR_BLUE, 1858.6686,-2040.8510,13.5469, 40.0, 0, 0);
 	Create3DTextLabel("/startmission untuk memulai misi", COLOR_BLUE, -685.5082,923.7488,12.1625, 40.0, 0, 0);
@@ -52673,5 +52695,28 @@ public PlayerWantedLevel(playerid){
 
 	SetPlayerWantedLevel(playerid, 2);
 	SetPlayerColor(playerid, COLOR_RED);
+	return 1;
+}
+new Float:RandomSpawn[][] =
+{
+	{1313.8289,-909.4399,38.3576},
+	{2132.8184,-1099.9266,24.6768},
+	{2271.9810,-1394.7314,24.0000},
+	{2661.8220,-1430.8977,30.4881}
+};
+forward Sweet(playerid);
+new DrugDealer = INVALID_PLAYER_ID;
+public Sweet(playerid){
+	new rand = random(sizeof(RandomSpawn));
+	DrugDealer = FCNPC_Create("DrugDealer");
+	FCNPC_Spawn(DrugDealer,1,RandomSpawn[rand][0],RandomSpawn[rand][1],RandomSpawn[rand][2]);
+	FCNPC_SetWeaponAccuracy(DrugDealer, 24, 0.1);
+ 	FCNPC_SetWeapon(DrugDealer, 24);
+  	FCNPC_SetAmmo(DrugDealer, 9999);
+  	SetPlayerTeam(DrugDealer,101);
+	FCNPC_SetHealth(DrugDealer,100.0);
+	FCNPC_AimAtPlayer(DrugDealer, playerid, true, -1, true, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+	SetPlayerCheckpoint(playerid,RandomSpawn[rand][0],RandomSpawn[rand][1],RandomSpawn[rand][2],7.0);
+	SetPlayerTeam(playerid,33);
 	return 1;
 }
