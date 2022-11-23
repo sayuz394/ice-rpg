@@ -7185,8 +7185,8 @@ public OnPlayerDeath(playerid, killerid, reason)
 	{
 	    if(GetPlayerTeam(killerid) == 33)
 		{
-			GivePlayerMoneyEx(playerid,4000);
-			DisablePlayerCheckpoint(playerid);
+			GivePlayerMoneyEx(killerid,4000);
+			DisablePlayerCheckpoint(killerid);
 		}
 	}
 	else if(GetPlayerTeamEx(playerid) == 9)
@@ -8458,6 +8458,11 @@ public OnPlayerEnterCheckpoint(playerid)
 		GivePlayerMoneyEx(playerid,5000);
 		DisablePlayerCheckpoint(playerid);
 		KillTimer(mountain);
+	}
+	if(IsPlayerInRangeOfPoint(playerid,7.0,1513.8284,-1426.7903,30.9633))
+	{
+		GivePlayerMoneyEx(playerid,5000);
+		DisablePlayerCheckpoint(playerid);
 	}
 	if(IsPlayerInRangeOfPoint(playerid,7.0,2350.1426,-1169.9412,28.0395))
 	{
@@ -11771,14 +11776,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			    {
 			        SetPlayerPos(playerid,-380.5017,-1438.5305,25.7266);
 				}
-				case 2:
-				{
-				    SetPlayerPos(playerid,-685.5082,923.7488,12.1625);
-				}
-				case 3:
-				{
-				    SetPlayerPos(playerid,2065.6460,-1703.6984,14.1484);
-				}
+
 			}
 		}
 	}
@@ -11799,6 +11797,10 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				{
 				    SetPlayerPos(playerid,-685.5082,923.7488,12.1625);
 				}
+				case 3:
+				{
+				    SetPlayerPos(playerid,2065.6460,-1703.6984,14.1484);
+				}
 			}
 		}
 	}
@@ -11811,6 +11813,10 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	            case 0:
 	            {
 	                SetPlayerPos(playerid,-2314.0386,-1619.7906,483.7646);
+	            }
+	            case 1:
+	            {
+					SetPlayerPos(playerid,1570.6035,-1337.4312,16.4844);
 	            }
 	        }
 	    }
@@ -45845,6 +45851,17 @@ CMD:startchallenge(playerid){
 	if(IsPlayerInRangeOfPoint(playerid,7.0,-2401.2957,-2188.0500,33.2891)){
 	    Sepeda(playerid);
 	}
+	if(IsPlayerInRangeOfPoint(playerid,7.0,1570.6035,-1337.4312,16.4844)){
+		BaseJump(playerid);
+	}
+	return 1;
+}
+forward BaseJump(playerid);
+
+public BaseJump(playerid){
+	SetPlayerPos(playerid,1548.7316,-1363.7416,326.2183);
+	SetPlayerCheckpoint(playerid,1513.8284,-1426.7903,30.9633,7.0);
+	GivePlayerWeapon(playerid,46,1);
 	return 1;
 }
 CMD:joinjob(playerid){
@@ -52705,7 +52722,7 @@ new Float:RandomSpawn[][] =
 	{2661.8220,-1430.8977,30.4881}
 };
 forward Sweet(playerid);
-new DrugDealer = INVALID_PLAYER_ID;
+new DrugDealer;
 public Sweet(playerid){
 	new rand = random(sizeof(RandomSpawn));
 	DrugDealer = FCNPC_Create("DrugDealer");
