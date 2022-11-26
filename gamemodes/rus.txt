@@ -1,5 +1,6 @@
-D:\Download\ICE FREEROAM CITY\gamemodes\mobile.pwn(7651) : èäåíòèôèêàòîðó ïðèñâîåíî çíà÷åíèå, íî îí íå èñïîëüçóåòñÿ: "vehicleids"
-D:\Download\ICE FREEROAM CITY\gamemodes\mobile.pwn(45850) : èäåíòèôèêàòîðó ïðèñâîåíî çíà÷åíèå, íî îí íå èñïîëüçóåòñÿ: "vehicleids"
+D:\Download\ICE FREEROAM CITY\gamemodes\mobile.pwn(7662) : èäåíòèôèêàòîðó ïðèñâîåíî çíà÷åíèå, íî îí íå èñïîëüçóåòñÿ: "vehicleids"
+D:\Download\ICE FREEROAM CITY\gamemodes\mobile.pwn(28229) : ïðåäóïðåæäåíèå 202: êîëè÷åñòâî àðãóìåíòîâ íå ñîâïàäàåò ñ îáúÿâëåíèåì
+D:\Download\ICE FREEROAM CITY\gamemodes\mobile.pwn(45943) : èäåíòèôèêàòîðó ïðèñâîåíî çíà÷åíèå, íî îí íå èñïîëüçóåòñÿ: "vehicleids"
 ../include/gl_spawns.inc(23) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gArmySpawns"
 ../include/gl_spawns.inc(16) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gMedicalSpawns"
 ../include/gl_spawns.inc(9) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gPoliceSpawns"
@@ -8,3 +9,5 @@ D:\Download\ICE FREEROAM CITY\gamemodes\mobile.pwn(45850) : èäåíòèôèêà
 ../include/gl_spawns.inc(138) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gRandomSpawns_SanFierro"
 Pawn compiler 3.2.3664	 	 	Copyright (c) 1997-2016, ITB CompuPhase
 
+
+Ïðåäóïðåæäåíèé:1.
