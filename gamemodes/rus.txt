@@ -1,13 +1,17 @@
-D:\Download\ICE FREEROAM CITY\gamemodes\mobile.pwn(7662) : èäåíòèôèêàòîðó ïðèñâîåíî çíà÷åíèå, íî îí íå èñïîëüçóåòñÿ: "vehicleids"
-D:\Download\ICE FREEROAM CITY\gamemodes\mobile.pwn(28229) : ïðåäóïðåæäåíèå 202: êîëè÷åñòâî àðãóìåíòîâ íå ñîâïàäàåò ñ îáúÿâëåíèåì
-D:\Download\ICE FREEROAM CITY\gamemodes\mobile.pwn(45943) : èäåíòèôèêàòîðó ïðèñâîåíî çíà÷åíèå, íî îí íå èñïîëüçóåòñÿ: "vehicleids"
+D:\Download\ICE FREEROAM CITY\gamemodes\mobile.pwn(6971) : ïðåäóïðåæäåíèå 219: ïåðåìåííàÿ "wanted" óæå îáúÿâëåíà â áîëåå ãëîáàëüíîé çîíå âèäèìîñòè
+D:\Download\ICE FREEROAM CITY\gamemodes\mobile.pwn(7708) : èäåíòèôèêàòîðó ïðèñâîåíî çíà÷åíèå, íî îí íå èñïîëüçóåòñÿ: "vehicleids"
+D:\Download\ICE FREEROAM CITY\gamemodes\mobile.pwn(28381) : ïðåäóïðåæäåíèå 213: íåñîâïàäåíèå òèïîâ
+D:\Download\ICE FREEROAM CITY\gamemodes\mobile.pwn(46091) : èäåíòèôèêàòîðó ïðèñâîåíî çíà÷åíèå, íî îí íå èñïîëüçóåòñÿ: "vehicleids"
+D:\Download\ICE FREEROAM CITY\gamemodes\mobile.pwn(6463) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "FirstSpawn"
+D:\Download\ICE FREEROAM CITY\gamemodes\mobile.pwn(6482) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "flare"
 ../include/gl_spawns.inc(23) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gArmySpawns"
 ../include/gl_spawns.inc(16) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gMedicalSpawns"
 ../include/gl_spawns.inc(9) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gPoliceSpawns"
 ../include/gl_spawns.inc(104) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gRandomSpawns_LasVenturas"
 ../include/gl_spawns.inc(58) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gRandomSpawns_LosSantos"
 ../include/gl_spawns.inc(138) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gRandomSpawns_SanFierro"
+D:\Download\ICE FREEROAM CITY\gamemodes\mobile.pwn(6777) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "wanted"
 Pawn compiler 3.2.3664	 	 	Copyright (c) 1997-2016, ITB CompuPhase
 
 
-Ïðåäóïðåæäåíèé:1.
+Ïðåäóïðåæäåíèé:2.

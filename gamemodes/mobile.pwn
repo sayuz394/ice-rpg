@@ -22,6 +22,7 @@ L1:
 
 #include <a_samp>
 #include <FCNPC>
+#include <Dini>
 //#include <nex-ac>
 #include "../include/a_mysql.inc"
 #include "../include/sscanf2.inc"
@@ -535,6 +536,7 @@ new VehicleColoursTableRGBA[128] = {
 #define GetPlayerPremium(%0)	GetPlayerData(%0, P_PREMIUM)		// akun premium
 #define GetPlayerSpawnSetting(%0) 		GetPlayerData(%0, P_SPAWN)  // tempat bertelur
 #define SetPlayerSpawnSetting(%0,%1) 	SetPlayerData(%0, P_SPAWN, %1)  // pengaturan spawn
+#define GetPlayerWantedLevelEx(%0) 		GetPlayerData(%0, P_WANTED)
 
 #define GetPlayerCurrentDonate(%0) 		GetPlayerData(%0, P_DONATE_CURRENT) 	// saldo donasi saat ini
 #define GetPlayerTotalDonate(%0) 		GetPlayerData(%0, P_DONATE_TOTAL) 	// pengisian saldo total
@@ -566,6 +568,8 @@ new VehicleColoursTableRGBA[128] = {
 #define SetPlayerTempJobState(%0,%1) 		SetPlayerData(%0, P_TEMP_JOB_STATE, %1)	// apa yang harus dilakukan
 #define SetPlayerTempJobCheckAnim(%0,%1)	SetPlayerData(%0, P_TEMP_JOB_CHECK, %1) // pemeriksaan animasi
 #define SetPlayerJobLoadItems(%0,%1) 		SetPlayerData(%0, P_JOB_LOAD_ITEMS, %1)	// diunggah (...)
+
+#define SetPlayerWantedLevelEx(%0,%1) 		SetPlayerData(%0, P_WANTED, %1)	// diunggah (...)
 
 #define IsPlayerLogged(%0)		GetPlayerData(%0, P_LOGGED)		// status otorisasi
 #define IsPlayerUseAnim(%0)		GetPlayerData(%0, P_USE_ANIM)	// Apakah animku digunakan (/anim)
@@ -804,6 +808,8 @@ enum E_PLAYER_STRUCT // struktur pemain
 	P_GAME_FOR_DAY,		// waktu permainan per hari
 	P_GAME_FOR_DAY_PREV,// waktu pertandingan kemarin
 	// -------------------------
+	
+	// -------------------------
 	P_COLOR,		// warna pemain
 	P_SELECT_SKIN, 	// kulit yang dipilih
 	P_CHAT_TYPE,	// jenis obrolan
@@ -968,6 +974,7 @@ enum E_PLAYER_STRUCT // struktur pemain
 	P_RENT_BIKE,
 	P_STATUS[4],
 	P_STATE_REG_INFO,
+	P_WANTED,
 };
 new timer_calling[MAX_PLAYERS];
 // ------------------------------------------
@@ -2512,7 +2519,8 @@ enum // иды диалогов
 	DIALOG_REVIEW_JOB,
 	DIALOG_REVIEW_MISSION,
 	DIALOG_REVIEW_CHALLANGE,
-	DIALOG_REVIEW_GANG
+	DIALOG_REVIEW_GANG,
+	DIALOG_BLACKMARKET
 };
 
 // ------------------------------------------
@@ -6447,6 +6455,13 @@ new const
 	{2500,  2800, 3100, 3400, 3700, 4000, 4300, 4600, 15000, 30000}, // LSPD
 	{3000,  3300, 3600, 3900, 4200, 4500, 4800, 5100, 20000, 30000} // FBI
 };
+#define SERVER_DATABASE "weapons.db"
+
+new DB:server_database;
+new DBResult:database_result;
+
+new bool:FirstSpawn[MAX_PLAYERS];
+
 new PoliceNPC = INVALID_PLAYER_ID;
 new PoliceNPCS = INVALID_PLAYER_ID;
 new total_vehicles_from_files=0;
@@ -6464,16 +6479,19 @@ public CheckNPC(playerid){
 	return 1;
 }
 new door;
+new flare;
 new pickup_briefcase_1;
 new pickup_briefcase_2;
 new pickup_briefcase_3;
 new pickup_briefcase_4;
 new pickup_briefcase_5;
 new pickup_briefcase_6;
+new pickup_bm;
 
 public OnGameModeInit()
 {
-
+    server_database = db_open(SERVER_DATABASE);
+    db_query(server_database, "CREATE TABLE IF NOT EXISTS `WEAPONS` (`NAME`, `MELEE`, `HANDGUN`, `HANDGUNAMMO`, `SHOTGUN`, `SHOTGUNAMMO`, `SUB`, `SUBAMMO`, `ASSAULT`, `ASSAULTAMMO`, `RIFLE`, `RIFLEAMMO`,`WANTED`)");
     PoliceNPC = FCNPC_Create("Police");
 	FCNPC_Spawn(PoliceNPC,71,1477.3547,-1772.3085,18.7958);
 	FCNPC_SetWeaponAccuracy(PoliceNPC, 31, 0.1);
@@ -6753,18 +6771,33 @@ public OnPlayerRequestSpawn(playerid)
 
 	return 1;
 }
+forward CheckWanted(playerid);
 
+
+new wanted;
 public OnPlayerConnect(playerid)
 {
-    SetPlayerMapIcon(playerid, 6,2065.6460,-1703.6984,14.1484, 8, 0, MAPICON_LOCAL);
-    SetPlayerMapIcon(playerid, 5,-685.5082,923.7488,12.1625, 42, 0, MAPICON_LOCAL);
-    SetPlayerMapIcon(playerid, 4,2523.2729,-1679.6223,15.4970, 38, 0, MAPICON_LOCAL);
-    SetPlayerMapIcon(playerid, 3,1858.6686,-2040.8510,13.5469, 13, 0, MAPICON_LOCAL);
 	if(IsPlayerNPC(playerid))
     {
         SendClientMessageToAll(-1, "An NPC connected!");
         return 1;
     }
+	
+    SetPlayerMapIcon(playerid, 6,2065.6460,-1703.6984,14.1484, 8, 0, MAPICON_LOCAL);
+    SetPlayerMapIcon(playerid, 5,-685.5082,923.7488,12.1625, 42, 0, MAPICON_LOCAL);
+    SetPlayerMapIcon(playerid, 4,2523.2729,-1679.6223,15.4970, 38, 0, MAPICON_LOCAL);
+    SetPlayerMapIcon(playerid, 3,1858.6686,-2040.8510,13.5469, 13, 0, MAPICON_LOCAL);
+    RemoveBuildingForPlayer(playerid, 11544, -1483.280, 2642.379, 56.695, 0.250);
+	RemoveBuildingForPlayer(playerid, 3278, -1485.719, 2641.040, 59.617, 0.250);
+	RemoveBuildingForPlayer(playerid, 3278, -1485.719, 2637.179, 59.617, 0.250);
+	RemoveBuildingForPlayer(playerid, 3278, -1485.719, 2633.330, 59.617, 0.250);
+	RemoveBuildingForPlayer(playerid, 3278, -1485.719, 2629.469, 59.617, 0.250);
+	RemoveBuildingForPlayer(playerid, 3278, -1485.719, 2625.610, 59.617, 0.250);
+	RemoveBuildingForPlayer(playerid, 3278, -1485.719, 2621.629, 59.617, 0.250);
+	RemoveBuildingForPlayer(playerid, 3278, -1485.719, 2617.629, 59.617, 0.250);
+	RemoveBuildingForPlayer(playerid, 3278, -1485.719, 2613.590, 59.617, 0.250);
+	RemoveBuildingForPlayer(playerid, 3278, -1483.650, 2611.399, 59.617, 0.250);
+	RemoveBuildingForPlayer(playerid, 3278, -1479.699, 2611.399, 59.617, 0.250);
 	new hour, minute;
 	gettime(hour, minute);
 
@@ -6929,6 +6962,7 @@ public: CheckPlayerAccount(playerid, race)
 
 public OnPlayerDisconnect(playerid, reason)
 {
+	SaveWeapons(playerid);
 	new query[140];
     mysql_format(mysql, query, sizeof query, "UPDATE accounts SET online = '0' WHERE id=%d LIMIT 1", GetPlayerAccountID(playerid));
 	mysql_query(mysql, query);
@@ -7100,6 +7134,18 @@ public: SavePlayerAccount(playerid)
 
 public OnPlayerSpawn(playerid)
 {
+    new nombre[MAX_PLAYER_NAME], archivo[256];
+	GetPlayerName(playerid, nombre, sizeof(nombre));
+	format(archivo, sizeof(archivo), "/User/%s.ini", nombre);
+	if(!dini_Exists(archivo)){
+
+	}
+	else
+	{
+		PlayerWantedLevel(playerid);
+		print("wantedlevelplayerjoin");
+	}
+	LoadWeapons(playerid);
 	if(IsPlayerNPC(playerid))
 	{
 		new npcname[MAX_PLAYER_NAME];
@@ -7138,7 +7184,7 @@ public OnPlayerSpawn(playerid)
 
 					if(!mysql_errno())
 					{
-						SetPlayerData(playerid, P_MONEY, 250);
+						SetPlayerData(playerid, P_MONEY, 10000);
 
 						SetPlayerSpawnInit(playerid);
 						SpawnPlayer(playerid);
@@ -9644,47 +9690,111 @@ public: ChangeColorPTDUpdate(playerid)
 
 public OnPlayerPickUpPickupEx(playerid, pickupid, action_type, action_id)
 {
+	if(pickupid == pickup_bm)
+	{
+	    ShowPlayerDialog(playerid,DIALOG_BLACKMARKET,DIALOG_STYLE_LIST,"SENJATA","Pistol		1000$\nShotgun          1500$\nAK-47        3000$\nGranade          5000$","Beli","Batal");
+	}
 	if(pickupid == pickup_briefcase_1)
 	{
 	    GivePlayerMoneyEx(playerid,20000);
-		DestroyPickup(pickup_briefcase_1);
-		SetPlayerWantedLevel(playerid,6);
-		SetPlayerColor(playerid,COLOR_RED);
+		SetPlayerWantedLevel(playerid, 2);
+		SetPlayerColor(playerid, COLOR_RED);
+		SetPlayerTeamEx(playerid,100);
+	  	SetPlayerColor(playerid,COLOR_RED);
+		new nombre[MAX_PLAYER_NAME], archivo[256];
+		GetPlayerName(playerid, nombre, sizeof(nombre));
+		format(archivo, sizeof(archivo), "/User/%s.ini", nombre);
+		dini_Create(archivo);
 	}
 	if(pickupid == pickup_briefcase_2)
 	{
 	    GivePlayerMoneyEx(playerid,20000);
+		SetPlayerWantedLevel(playerid, 2);
+		SetPlayerColor(playerid, COLOR_RED);
+		SetPlayerTeamEx(playerid,100);
+	  	SetPlayerColor(playerid,COLOR_RED);
+		new nombre[MAX_PLAYER_NAME], archivo[256];
+		GetPlayerName(playerid, nombre, sizeof(nombre));
+		format(archivo, sizeof(archivo), "/User/%s.ini", nombre);
+		dini_Create(archivo);
+	    UpdatePlayerDatabaseInt(playerid, "wanted", 6);
+	    GivePlayerMoneyEx(playerid,20000);
 		DestroyPickup(pickup_briefcase_2);
 		SetPlayerWantedLevel(playerid,6);
 		SetPlayerColor(playerid,COLOR_RED);
+		SetPlayerTeamEx(playerid,100);
 	}
 	if(pickupid == pickup_briefcase_3)
 	{
 	    GivePlayerMoneyEx(playerid,20000);
+		SetPlayerWantedLevel(playerid, 2);
+		SetPlayerColor(playerid, COLOR_RED);
+		SetPlayerTeamEx(playerid,100);
+	  	SetPlayerColor(playerid,COLOR_RED);
+		new nombre[MAX_PLAYER_NAME], archivo[256];
+		GetPlayerName(playerid, nombre, sizeof(nombre));
+		format(archivo, sizeof(archivo), "/User/%s.ini", nombre);
+		dini_Create(archivo);
+	    UpdatePlayerDatabaseInt(playerid, "wanted", 6);
+	    GivePlayerMoneyEx(playerid,20000);
 		DestroyPickup(pickup_briefcase_3);
 		SetPlayerWantedLevel(playerid,6);
 		SetPlayerColor(playerid,COLOR_RED);
+		SetPlayerTeamEx(playerid,100);
 	}
 	if(pickupid == pickup_briefcase_4)
 	{
 	    GivePlayerMoneyEx(playerid,20000);
+		SetPlayerWantedLevel(playerid, 2);
+		SetPlayerColor(playerid, COLOR_RED);
+		SetPlayerTeamEx(playerid,100);
+	  	SetPlayerColor(playerid,COLOR_RED);
+		new nombre[MAX_PLAYER_NAME], archivo[256];
+		GetPlayerName(playerid, nombre, sizeof(nombre));
+		format(archivo, sizeof(archivo), "/User/%s.ini", nombre);
+		dini_Create(archivo);
+	    UpdatePlayerDatabaseInt(playerid, "wanted", 6);
+	    GivePlayerMoneyEx(playerid,20000);
 		DestroyPickup(pickup_briefcase_4);
 		SetPlayerWantedLevel(playerid,6);
 		SetPlayerColor(playerid,COLOR_RED);
+		SetPlayerTeamEx(playerid,100);
 	}
 	if(pickupid == pickup_briefcase_5)
 	{
 	    GivePlayerMoneyEx(playerid,20000);
+		SetPlayerWantedLevel(playerid, 2);
+		SetPlayerColor(playerid, COLOR_RED);
+		SetPlayerTeamEx(playerid,100);
+	  	SetPlayerColor(playerid,COLOR_RED);
+		new nombre[MAX_PLAYER_NAME], archivo[256];
+		GetPlayerName(playerid, nombre, sizeof(nombre));
+		format(archivo, sizeof(archivo), "/User/%s.ini", nombre);
+		dini_Create(archivo);
+	    UpdatePlayerDatabaseInt(playerid, "wanted", 6);
+	    GivePlayerMoneyEx(playerid,20000);
 		DestroyPickup(pickup_briefcase_5);
 		SetPlayerWantedLevel(playerid,6);
 		SetPlayerColor(playerid,COLOR_RED);
+		SetPlayerTeamEx(playerid,100);
 	}
 	if(pickupid == pickup_briefcase_6)
 	{
 	    GivePlayerMoneyEx(playerid,20000);
+		SetPlayerWantedLevel(playerid, 2);
+		SetPlayerColor(playerid, COLOR_RED);
+		SetPlayerTeamEx(playerid,100);
+	  	SetPlayerColor(playerid,COLOR_RED);
+		new nombre[MAX_PLAYER_NAME], archivo[256];
+		GetPlayerName(playerid, nombre, sizeof(nombre));
+		format(archivo, sizeof(archivo), "/User/%s.ini", nombre);
+		dini_Create(archivo);
+	    UpdatePlayerDatabaseInt(playerid, "wanted", 6);
+	    GivePlayerMoneyEx(playerid,20000);
 		DestroyPickup(pickup_briefcase_6);
 		SetPlayerWantedLevel(playerid,6);
 		SetPlayerColor(playerid,COLOR_RED);
+		SetPlayerTeamEx(playerid,100);
 	}
 	if(action_type != PICKUP_ACTION_TYPE_TELEPORT && GetPlayerData(playerid, P_LAST_PICKUP) != -1)
 	{
@@ -11791,6 +11901,49 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	else
 	{
  		list_id = strval(inputtext);
+	}
+	if(dialogid == DIALOG_BLACKMARKET)
+	{
+	    if(response)
+	    {
+	        switch(listitem)
+	        {
+	            case 0:
+	            {
+					if(GetPlayerMoneyEx(playerid) >= 1000){
+					    SendClientMessage(playerid,COLOR_RED,"Anda Sukses Membeli Pistol");
+					    GivePlayerWeapon(playerid,22,60);
+					    GivePlayerMoneyEx(playerid,-1000);
+					}
+	            }
+	            case 1:
+	            {
+	                if(GetPlayerMoneyEx(playerid) >= 1500){
+	                	SendClientMessage(playerid,COLOR_RED,"Anda Sukses Membeli Shotgun");
+	                	GivePlayerWeapon(playerid,25,20);
+	                	GivePlayerMoneyEx(playerid,-1500);
+
+					}
+	            }
+	            case 2:
+	            {
+	                if(GetPlayerMoneyEx(playerid) >= 3000){
+	                    SendClientMessage(playerid,COLOR_RED,"Anda Sukses Membeli AK-47");
+	                    GivePlayerWeapon(playerid,30,90);
+	                    GivePlayerMoneyEx(playerid,-3000);
+
+					}
+	            }
+	            case 3:
+	            {
+	                if(GetPlayerMoneyEx(playerid) >= 10000){
+                        SendClientMessage(playerid,COLOR_RED,"Anda Sukses Membeli Granat");
+                        GivePlayerWeapon(playerid,16,5);
+                        GivePlayerMoneyEx(playerid,-10000);
+					}
+	            }
+		 	}
+	    }
 	}
 	if(dialogid == DIALOG_REVIEW)
 	{
@@ -28223,10 +28376,9 @@ public: LoadPlayerData(playerid)
 		SetPlayerData(playerid, P_LAST_Y,	cache_get_field_content_float(0, "last_y"));
 		SetPlayerData(playerid, P_LAST_Z,	cache_get_field_content_float(0, "last_z"));
 		SetPlayerData(playerid, P_LAST_FA,	cache_get_field_content_float(0, "last_fa"));
-		SetPlayerWantedLevel(playerid,      cache_get_field_content_int(0, "wanted"));
 		
-		
-		GivePlayerWeapon(playerid,   	cache_get_field_content_int(0, "weapon"));
+		SetPlayerData(playerid, P_WANTED,  	cache_get_field_content_int(0, "wanted"));
+		SetPlayerWantedLevel(playerid, P_WANTED);
 		
 		SetPlayerData(playerid, P_REG_TIME, 	cache_get_field_content_int(0, "reg_time"));
 		cache_get_field_content(0, "reg_ip", g_player[playerid][P_REG_IP], mysql, 16);
@@ -36704,7 +36856,6 @@ stock GetFamilyChatID(team)
 	}
 	return 0;
 }
-
 stock GivePlayerMoneyEx(playerid, money, description[]="None", bool:save=true, bool:game_text=true)
 {
 	if(money < 0 && GetPlayerMoneyEx(playerid) < money) return -1;
@@ -39148,22 +39299,18 @@ CMD:enters(playerid){
 	
 	return 1;
 }
-forward BombHeist(playerid);
 
-public BombHeist(playerid){
-	CreateExplosion(1385.92676, -28.38380, 505.42310,1,10.0);
-	DestroyObject(door);
-	SetPlayerWantedLevel(playerid,6);
-	SetPlayerColor(playerid,COLOR_RED);
-	SendClientMessageToAll(COLOR_RED,"Sebuah Perampokan Bersenjata sedang terjadi silahkan masuk ke rumah / ke tempat aman pertempuran besar akan terjadi");
-	return 1;
-}
 CMD:plantbomb(playerid){
 	if(IsPlayerInRangeOfPoint(playerid,7.0,1386.3025,-28.3420,505.1691))
 	{
 	    if(GetPlayerWeapon(playerid) == 16)
 	    {
-	        SetTimer("BombHeist",300,false);
+	        GivePlayerWeapon(playerid,16,-1);
+	        CreateExplosion(1385.92676, -28.38380, 505.42310,1,10.0);
+			DestroyObject(door);
+			SetPlayerWantedLevel(playerid,6);
+			SetPlayerColor(playerid,COLOR_RED);
+			SendClientMessageToAll(COLOR_RED,"Sebuah Perampokan Bersenjata sedang terjadi silahkan masuk ke rumah / ke tempat aman pertempuran besar akan terjadi");
 	    }
 	}
 
@@ -42586,15 +42733,16 @@ CMD:givegun(playerid, params[])
 }
 CMD:joinfraksi(playerid,params[])
 {
-    extract params -> new org_id;
-    if(!(2 <= org_id <= 6)){
+	if(GetPlayerLevel(playerid) >= 4){
+ 		extract params -> new org_id;
+    	if(!(2 <= org_id <= 6)){
 		SendClientMessage(playerid, 0xCECECEFF, "ID organisasi tidak valid");
-		SendClientMessage(playerid, 0xCECECEFF, "1 - Balai KotaLos-Santos");
 		SendClientMessage(playerid, 0xCECECEFF, "2 - Angkatan Laut");
 		SendClientMessage(playerid, 0xCECECEFF, "3 - Rumah sakit g.Los-Santos");
 		SendClientMessage(playerid, 0xCECECEFF, "4 - Media r.Los-Santos");
 		SendClientMessage(playerid, 0xCECECEFF, "5 - LSPD");
 		SendClientMessage(playerid, 0xCECECEFF, "6 - FBI");
+	}
 	}
 	else
 	{
@@ -45898,7 +46046,7 @@ CMD:uninviteoff(playerid, params[])
 	return 1;
 }
 CMD:map(playerid){
-	ShowPlayerDialog(playerid,DIALOG_MAP,DIALOG_STYLE_LIST,"Maps","Jobs\nIlegal Jobs","Choose","Exit");
+	ShowPlayerDialog(playerid,DIALOG_MAP,DIALOG_STYLE_LIST,"Maps","Jobs\nIlegal Jobs\nBlackMarket","Choose","Exit");
 	return 1;
 }
 CMD:reviewserver(playerid){
@@ -46976,7 +47124,7 @@ CMD:untie(playerid, params[])
 
 CMD:cuff(playerid, params[])
 {
-	if(GetPlayerColor(playerid) == COLOR_RED){
+	if(GetPlayerWantedLevel(playerid) >= 1){
 			if(!IsPlayerInPoliceTeam(playerid)) return SendClientMessage(playerid, 0xCECECEFF, "Anda bukan petugas penegak hukum");
 
 			extract params -> new to_player; else return SendClientMessage(playerid, 0xCECECEFF, "Gunakan: /cuff [id pemain]");
@@ -47194,7 +47342,8 @@ CMD:clear(playerid, params[])
 
 CMD:arrest(playerid, params[])
 {
-	if(!IsPlayerInPoliceTeam(playerid)) return SendClientMessage(playerid, 0xCECECEFF, "Anda bukan petugas penegak hukum");
+	if(GetPlayerWantedLevel(playerid) >= 1){
+ 	if(!IsPlayerInPoliceTeam(playerid)) return SendClientMessage(playerid, 0xCECECEFF, "Anda bukan petugas penegak hukum");
 
     extract params -> new to_player, jail_time, string: reason[30];
 
@@ -47232,7 +47381,12 @@ CMD:arrest(playerid, params[])
 	SendClientMessage(criminalid, 0xCECECEFF, "Waktu sampai kesimpulan: {CCCC00}/time");
 
     JailPlayer(to_player, jail_time);
+    new nombre[MAX_PLAYER_NAME], archivo[256];
+	GetPlayerName(criminalid, nombre, sizeof(nombre));
+	format(archivo, sizeof(archivo), "/User/%s.ini", nombre);
+	dini_Remove(archivo);
 
+	}
 	return 1;
 }
 
@@ -49398,12 +49552,44 @@ stock GivePlayerWeaponEx(playerid, weapon_id, weapon_ammo)
 }
 
 stock IFR_OBJ(){
+	CreateActor(1,-1476.4973, 2636.3423, 58.7958,90.0000);
+    CreateObject(18001, -1476.44470, 2635.62720, 59.36125,   0.00000, 0.00000, 270.00000);
+	CreateObject(357, -1476.51184, 2638.75513, 59.28370,   0.00000, -30.80000, 98.19995);
+	CreateObject(357, -1476.52148, 2638.82104, 59.27875,   -1.89996, -30.80000, 278.19995);
+	CreateObject(349, -1476.39807, 2636.50757, 59.27322,   -2.49999, -28.30000, 95.70000);
+	CreateObject(349, -1476.53064, 2636.89209, 59.29340,   -2.49999, -28.30000, 275.70001);
+	CreateObject(2035, -1476.47693, 2634.61938, 59.72742,   92.79999, -179.70004, -89.69997);
+	CreateObject(2035, -1476.45007, 2634.61938, 59.17807,   92.79999, -179.70004, -89.69997);
+	CreateObject(2036, -1476.45825, 2632.71533, 59.71796,   90.00000, 0.00000, 90.00000);
+	CreateObject(2036, -1476.45825, 2632.71533, 59.20795,   90.00000, 0.00000, 90.00000);
+	CreateObject(2068, -1481.78711, 2639.51709, 60.68126,   0.00000, 0.00000, 0.00000);
+	CreateObject(2068, -1481.78711, 2631.13623, 60.68126,   0.00000, 0.00000, 0.00000);
+	CreateObject(2614, -1476.47375, 2641.03369, 59.58124,   0.00000, 0.00000, 270.00000);
+	CreateObject(2614, -1476.47375, 2630.26245, 59.58124,   0.00000, 0.00000, 270.00000);
+	CreateObject(2047, -1480.12451, 2643.07007, 59.89124,   0.00000, 0.00000, 0.00000);
+	CreateObject(2035, -1478.42712, 2634.60522, 58.67085,   182.79999, -179.30005, -116.69996);
+	CreateObject(2035, -1478.21216, 2635.89551, 58.63654,   182.79999, -179.30005, -116.69996);
+	CreateObject(1578, -1478.39380, 2637.66406, 58.59795,   0.00000, 0.00000, 0.00000);
+	CreateObject(1578, -1478.39380, 2637.66406, 58.76795,   0.00000, 0.00000, 0.00000);
+	CreateObject(2044, -1478.44751, 2638.23975, 58.66795,   0.00000, 0.00000, 0.00000);
+	CreateObject(2044, -1478.44751, 2638.48950, 58.66795,   0.00000, 0.00000, 0.00000);
+	CreateObject(2044, -1478.44751, 2638.70972, 58.66795,   0.00000, 0.00000, 0.00000);
+	CreateObject(1279, -1478.39844, 2642.84351, 58.66795,   0.00000, 0.00000, 0.00000);
+	CreateObject(1279, -1478.39844, 2642.84351, 58.92794,   0.00000, 0.00000, 0.00000);
+	CreateObject(1579, -1478.46924, 2637.20166, 58.61125,   0.00000, 0.00000, 0.00000);
+	CreateObject(1579, -1478.46924, 2637.20166, 58.74125,   0.00000, 0.00000, 0.00000);
+	CreateObject(2045, -1478.25769, 2633.09521, 58.68124,   0.00000, 0.00000, 0.00000);
+	CreateObject(2045, -1478.54785, 2633.09521, 58.68124,   0.00000, 0.00000, 0.00000);
+	CreateObject(1636, -1478.48718, 2632.29297, 58.72126,   0.00000, 0.00000, 90.00000);
+	CreateObject(1636, -1478.48718, 2632.04272, 58.72126,   0.00000, 0.00000, 90.00000);
+	CreateObject(19362, -1476.32556, 2614.24780, 59.29795,   0.00000, 0.00000, 0.00000);
 	pickup_briefcase_1 = CreatePickup(1210, 2, 1379.9421,-32.5110,505.1691, -1);
 	pickup_briefcase_2 = CreatePickup(1210, 2, 1382.1285,-32.5093,505.1691, -1);
 	pickup_briefcase_3 = CreatePickup(1210, 2, 1384.3306,-32.5103,505.1691, -1);
 	pickup_briefcase_4 = CreatePickup(1210, 2, 1383.4697,-27.9860,505.1691, -1);
 	pickup_briefcase_5 = CreatePickup(1210, 2, 1381.6611,-27.8132,505.1691, -1);
 	pickup_briefcase_6 = CreatePickup(1210, 2, 1379.9982,-27.8152,505.1691, -1);
+	pickup_bm = CreatePickup(2061,1,-1478.6375, 2634.8401, 58.7958,-1);
 	Create3DTextLabel("/startmission untuk memulai misi", COLOR_GREEN, 2065.6460,-1703.6984,14.1484, 40.0, 0, 0);
 	Create3DTextLabel("/startmission untuk memulai misi", COLOR_GREEN, 2523.2729,-1679.6223,15.4970, 40.0, 0, 0);
 	Create3DTextLabel("/startmission untuk memulai misi", COLOR_BLUE, 1858.6686,-2040.8510,13.5469, 40.0, 0, 0);
@@ -53649,6 +53835,13 @@ public PlayerWantedLevel(playerid){
 
 	SetPlayerWantedLevel(playerid, 2);
 	SetPlayerColor(playerid, COLOR_RED);
+	UpdatePlayerDatabaseInt(playerid, "wanted", 2);
+	SetPlayerTeamEx(playerid,100);
+  	SetPlayerColor(playerid,COLOR_RED);
+	new nombre[MAX_PLAYER_NAME], archivo[256];
+	GetPlayerName(playerid, nombre, sizeof(nombre));
+	format(archivo, sizeof(archivo), "/User/%s.ini", nombre);
+	dini_Create(archivo);
 	return 1;
 }
 new Float:RandomSpawn[][] =
@@ -53674,3 +53867,82 @@ public Sweet(playerid){
 	SetPlayerTeam(playerid,33);
 	return 1;
 }
+stock SaveWeapons(playerid)
+{
+	new query[400], melee_data[2], handgun_data[2], shotgun_data[2], sub_data[2], assault_data[2], rifle_data[2],wlevel;
+	GetPlayerWeaponData(playerid, 1, melee_data[0], melee_data[1]);
+	GetPlayerWeaponData(playerid, 2, handgun_data[0], handgun_data[1]);
+	GetPlayerWeaponData(playerid, 3, shotgun_data[0], shotgun_data[1]);
+	GetPlayerWeaponData(playerid, 4, sub_data[0], sub_data[1]);
+	GetPlayerWeaponData(playerid, 5, assault_data[0], assault_data[1]);
+	GetPlayerWeaponData(playerid, 6, rifle_data[0], rifle_data[1]);
+	wlevel = GetPlayerWantedLevel(playerid);
+
+	format(query, sizeof(query),
+	"UPDATE `WEAPONS` SET MELEE = '%d', HANDGUN = '%d', HANDGUNAMMO = '%d', SHOTGUN = '%d', SHOTGUNAMMO = '%d', SUB = '%d', SUBAMMO = '%d', ASSAULT = '%d', ASSAULTAMMO = '%d', RIFLE = '%d', RIFLEAMMO = '%d', WANTED = '%d' WHERE `NAME` = '%q' COLLATE NOCASE",
+	melee_data[0], handgun_data[0], handgun_data[1], shotgun_data[0], shotgun_data[1], sub_data[0], sub_data[1], assault_data[0], assault_data[1], rifle_data[0], rifle_data[1], wlevel, GetName(playerid));
+	database_result = db_query(server_database, query);
+	db_free_result(database_result);
+	return 1;
+}
+
+stock LoadWeapons(playerid)
+{
+    new query[256], field[64], handgun, shotgun, sub, assault, rifle, ammo = 0, wlevels;
+	format(query, sizeof(query), "SELECT * FROM `WEAPONS` WHERE `NAME` = '%q' COLLATE NOCASE", GetName(playerid));
+	database_result = db_query(server_database, query);
+	if(db_num_rows(database_result))
+	{
+		db_get_field_assoc(database_result, "MELEE", field, sizeof(field));
+		GivePlayerWeapon(playerid, strval(field), 1);
+
+		db_get_field_assoc(database_result, "HANDGUN", field, sizeof(field));
+		handgun = strval(field);
+
+		db_get_field_assoc(database_result, "HANDGUNAMMO", field, sizeof(field));
+		ammo = strval(field);
+		GivePlayerWeapon(playerid, handgun, ammo);
+
+		db_get_field_assoc(database_result, "SHOTGUN", field, sizeof(field));
+		shotgun = strval(field);
+
+		db_get_field_assoc(database_result, "SHOTGUNAMMO", field, sizeof(field));
+		ammo = strval(field);
+		GivePlayerWeapon(playerid, shotgun, ammo);
+
+		db_get_field_assoc(database_result, "SUB", field, sizeof(field));
+		sub = strval(field);
+
+		db_get_field_assoc(database_result, "SUBAMMO", field, sizeof(field));
+		ammo = strval(field);
+		GivePlayerWeapon(playerid, sub, ammo);
+
+		db_get_field_assoc(database_result, "ASSAULT", field, sizeof(field));
+		assault = strval(field);
+
+		db_get_field_assoc(database_result, "ASSAULTAMMO", field, sizeof(field));
+		ammo = strval(field);
+		GivePlayerWeapon(playerid, assault, ammo);
+
+		db_get_field_assoc(database_result, "RIFLE", field, sizeof(field));
+		rifle = strval(field);
+
+		db_get_field_assoc(database_result, "RIFLEAMMO", field, sizeof(field));
+		ammo = strval(field);
+		GivePlayerWeapon(playerid, rifle, ammo);
+		
+		db_get_field_assoc(database_result, "WANTED", field, sizeof(field));
+		wlevels = strval(field);
+		SetPlayerWantedLevel(playerid,wlevels);
+	}
+	db_free_result(database_result);
+	return 1;
+}
+stock GetName(playerid)
+{
+	new name[MAX_PLAYER_NAME];
+	GetPlayerName(playerid, name, sizeof(name));
+	return name;
+}
+
+
